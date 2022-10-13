@@ -1,0 +1,35 @@
+footer {
+    position: sticky;
+    top: 100%;
+    left: 0;
+    background-color: var(--primary-light);
+    padding: var(--size-3) var(--size-3);
+}
+
+footer>div:first-of-type {
+    height: 100%;
+    align-items: center;
+}
+
+article {
+    min-width: 130px;
+    display: flex;
+    justify-content: space-evenly;
+}
+
+a {
+    transition: transform var(--transition-duration);
+}
+
+a:hover {
+    transform: scale(1.1);
+}
+
+a img {
+    width: 25px;
+}
+
+h6 {
+    font-size: var(--font-size-extra-small);
+    font-weight: 500;
+}

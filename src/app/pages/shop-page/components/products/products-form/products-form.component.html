@@ -1,0 +1,47 @@
+<form [formGroup]="productForm" (ngSubmit)="submit()">
+    <h3>Product Form</h3>
+
+    <input formControlName="id" type="hidden">
+    <input formControlName="categoryId" type="hidden">
+
+    <label for="title">Title</label>
+    <input formControlName="title" type="text" id="title" placeholder="Title...">
+    <div *ngIf="title && title.errors && title.touched && title.invalid" class="errors-display">
+        <p *ngIf="title.errors['required']">Title is required</p>
+        <p *ngIf="(title.errors['minlength'])">Minimum length {{title.errors['minlength'].requiredLength}}</p>
+    </div>
+
+    <label for="description">Description</label>
+    <input formControlName="description" type="text" id="description" placeholder="Description..." autocomplete="off">
+    <div *ngIf="description && description.errors && description.touched && description.invalid" class="errors-display">
+        <p *ngIf="description.errors['maxlength']">>Maximum length {{description.errors['maxlength'].requiredLength}}
+        </p>
+    </div>
+
+    <label for="img">Image</label>
+    <input formControlName="img" type="url" id="img" placeholder="http://img...">
+    <div *ngIf="img && img.errors && img.touched && img.invalid" class="errors-display">
+        <p *ngIf="img.errors['required']">Image URL is required</p>
+    </div>
+
+    <label for="price">Price &#8364;</label>
+    <input formControlName="price" type="number" id="price" placeholder="8000...">
+    <div *ngIf="price && price.errors && price.touched && price.invalid" class="errors-display">
+        <p *ngIf="price.errors['min']">Price has to be more than 1 </p>
+    </div>
+
+    <label for="fuel">Fuel type</label>
+    <select formControlName="fuel" id="fuel">
+        <option value="" selected disabled>Fuel type...</option>
+        <option value="petrol" selected>Petrol</option>
+        <option value="diesel">Diesel</option>
+    </select>
+    <div *ngIf="fuel && fuel.errors && fuel.touched && fuel.invalid" class="errors-display">
+        <p *ngIf="fuel.errors['required']">Fuel selection is required</p>
+    </div>
+
+    <label for="flag">Include in Carousel</label>
+    <input formControlName="flag" type="checkbox" id="flag">
+
+    <button appButton type="submit" [class.disabled]="!productForm.dirty || productForm.invalid">Submit</button>
+</form>

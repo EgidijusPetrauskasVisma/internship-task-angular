@@ -1,0 +1,12 @@
+<dialog *ngIf="alertService.errorMessage || alertService.successMessage">
+    <div [class.error]="alertService.errorMessage" [class.success]="alertService.successMessage">
+        <img *ngIf="alertService.successMessage"
+            src="https://upload.wikimedia.org/wikipedia/commons/3/3b/Eo_circle_green_checkmark.svg" alt="success img">
+        <img *ngIf="alertService.errorMessage"
+            src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/Antu_dialog-error.svg/512px-Antu_dialog-error.svg.png?20160706101656"
+            alt="">
+        <p>{{alertService.errorMessage? alertService.errorMessage: alertService.successMessage}}</p>
+        <button closeButton *ngIf="alertService.errorMessage" type="button"
+            (click)="alertService.errorMessage=''">X</button>
+    </div>
+</dialog>
