@@ -1,10 +1,11 @@
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 
 import { ProductsService } from '../../core/services/products.service';
 import { CategoriesService } from '../../core/services/categories.service';
 import { Product } from '../../core/types';
 import { Category } from '../../core/types';
+import { map, switchMap, Observable, of, filter } from 'rxjs';
 
 
 @Component({
@@ -13,39 +14,33 @@ import { Category } from '../../core/types';
   styleUrls: ['./shop-page.component.css']
 })
 export class ShopPageComponent implements OnInit {
+  productsForCategory$: Observable<Product[]> = of([])
   categories: Category[] = [];
-  products: Product[] = [];
-
-  currentCategoryRoute: string = this.router.url.replace('/shop/', '');
+  currentCategoryRoute: string = '';
   currentCategory: Category = {} as Category;
 
   constructor(
-    private router: Router,
+    private route: ActivatedRoute,
     private productsService: ProductsService,
     private categoriesService: CategoriesService
   ) { }
 
   ngOnInit() {
+    this.route.paramMap.pipe(map(paramMap => paramMap.get('category'))).subscribe(res => {
+      if (!res) this.currentCategoryRoute = '';
+      else this.currentCategoryRoute = res;
+    });
     this.loadCategoriesAndProducts();
   }
 
   loadCategoriesAndProducts() {
-    this.categoriesService.getProductCategories().subscribe(resCategories => {
-      this.categories = resCategories;
-      const currentCategory = this.categories.find(c => c.title === this.currentCategoryRoute);
-      if (!currentCategory) return;
-      this.currentCategory = currentCategory;
-
-      this.productsService.getProductsByCategory(this.currentCategory.id).subscribe(resProducts => this.products = resProducts);
-    });
-  }
-
-  fuelFilter(fuel: string) {
-    this.productsService.getProductsByCategory(this.currentCategory.id).subscribe(resProducts => {
-      if (fuel === 'all')
-        this.products = resProducts;
-      else
-        this.products = resProducts.filter(product => product.fuel === fuel);
-    })
+    this.productsForCategory$ = this.categoriesService.getProductCategories().pipe(
+      map(categories => categories.find(c => c.title === this.currentCategoryRoute)),
+      switchMap((category): Observable<Product[]> => {
+        if (!category) return of();
+        this.currentCategory = category;
+        return this.productsService.getProductsByCategory(category.id);
+      })
+    )
   }
 }

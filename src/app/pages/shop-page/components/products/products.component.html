@@ -3,22 +3,23 @@
     <article class="tools">
         <form>
             <label for="filter">Search by fuel type</label>
-            <select #fuelFilter (change)="filterByFuel(fuelFilter.value)" name="filter" id="filter">
+            <select #fuelFilter [(ngModel)]="filterValue" name="filter" id="filter">
                 <option value="all" selected>All</option>
                 <option value="petrol">Petrol</option>
                 <option value="diesel">Diesel</option>
             </select>
         </form>
-        <button appButton (click)="toggleDialog()">Add Item</button>
+        <button appButton (click)="toggleDialog(productFormRef)">Add Item</button>
     </article>
 
     <article *ngIf="productsEmpty; else noItems" class="products-container container">
-        <div *ngFor="let product of products" class="product" id="{{product.id}}">
+        <div *ngFor="let product of products | productFilter: filterValue" class="product" id="{{product.id}}">
             <img src="{{product.img}}" alt="{{product.title}}">
             <p>{{product.title}}</p>
             <div class="buttons-container">
                 <button type="button" class="action-btn delete-item-btn" (click)="deleteProduct(product.id)">X</button>
-                <button type="button" class="action-btn edit-item-btn" (click)="toggleDialog(product)">Edit</button>
+                <button type="button" class="action-btn edit-item-btn"
+                    (click)="toggleDialog(productFormRef, product)">Edit</button>
             </div>
         </div>
     </article>
@@ -28,7 +29,7 @@
     <h2 id="no-items-heading">No items in this category</h2>
 </ng-template>
 
-<app-dialog [hidden]="!dialogOpen" (closeEvent)="toggleDialog()">
-    <products-form #productForm (editProductEvent)="editProduct($event)"
-        (createNewProductEvent)="createProduct($event)"></products-form>
+<app-dialog [hidden]="!dialogOpen" (closeEvent)="toggleDialog(productFormRef)">
+    <products-form #productFormRef (editProduct)="editProduct($event, productFormRef)"
+        (createNewProduct)="createProduct($event, productFormRef)"></products-form>
 </app-dialog>

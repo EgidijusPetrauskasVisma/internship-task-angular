@@ -1,15 +1,23 @@
 import { TestBed } from '@angular/core/testing';
-import { HttpClientModule } from '@angular/common/http';
-import { of, throwError } from 'rxjs';
+import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import { firstValueFrom, of, throwError } from 'rxjs';
 
 import { ProductsService } from './products.service';
 import { Product } from '../types/product';
 import { AlertService } from './alert.service';
+import { HttpErrorResponse } from '@angular/common/http';
 
 describe('ProductsService', () => {
   let service: ProductsService;
   let alertServiceSpy: any;
+  let httpMock: HttpTestingController;
 
+  const mockError = new HttpErrorResponse({
+    status: 400,
+    statusText: 'Bad Request',
+    error: { code: 'error', message: 'Error message' }
+  })
+  const serverAddress = 'http://localhost:8400';
   const dummyProduct = {
     title: "",
     description: "",
@@ -22,203 +30,125 @@ describe('ProductsService', () => {
   };
   const newProduct: Omit<Product, 'id'> = dummyProduct;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     TestBed.configureTestingModule({
-      imports: [HttpClientModule]
+      imports: [HttpClientTestingModule]
     });
     service = TestBed.inject(ProductsService);
+    httpMock = TestBed.inject(HttpTestingController);
     alertServiceSpy = jasmine.createSpyObj<AlertService>('alertServiceSpy', ['setErrorMessage']);
   });
+
+  afterEach(() => {
+    httpMock.verify();
+  })
 
   it('should be created', () => {
     expect(service).toBeTruthy();
   });
 
-  // getProducts
-  it('should return array of products', (done: DoneFn) => {
-    const result = [dummyProduct];
+  describe('getProducts', () => {
+    it('should return array of products', async () => {
+      const result = [dummyProduct];
+      const response = firstValueFrom(service.getProducts());
 
-    spyOn(service, 'getProducts').and.returnValue(of(result));
+      const mock = httpMock.expectOne(`${serverAddress}/items`);
+      mock.flush([dummyProduct]);
 
-    service.getProducts().subscribe(response => {
-      expect(response).toEqual(result);
+      expect(await response).toEqual(result);
     })
-    done();
+
+    it('should return empty array after getting products fail', async () => {
+      const result = [] as Product[];
+      const response = firstValueFrom(service.getProducts());
+
+      const mock = httpMock.expectOne(`${serverAddress}/items`);
+      mock.flush(mockError.error, mockError);
+
+      expect(await response).toEqual(result);
+    })
   })
 
-  it('should return empty array after getting products fails', (done: DoneFn) => {
-    const message = "Error while getting products";
-    const result = [] as Product[];
+  describe('getProductsByCategory', () => {
+    it('should return array of products filtered by category', async () => {
+      const categoryId = 1;
+      const result = [dummyProduct];
+      const response = firstValueFrom(service.getProductsByCategory(categoryId));
 
-    spyOn(service, 'getProducts').and.callFake(() => {
-      alertServiceSpy.setErrorMessage(message);
-      return of(result);
-    });
+      const mock = httpMock.expectOne(`${serverAddress}/items?categoryId=${categoryId}`);
+      mock.flush([dummyProduct]);
 
-    service.getProducts().subscribe(response => {
-      expect(response).toEqual(result);
-      expect(alertServiceSpy.setErrorMessage.calls.count())
-        .withContext('alertService was called once')
-        .toBe(1);
+      expect(await response).toEqual(result);
+      expect(mock.request.method).toBe('GET');
     })
-    done();
+
+    it('should return empty array after getting products by category fails', async () => {
+      const categoryId = 1;
+      const result = [] as Product[];
+      const response = firstValueFrom(service.getProductsByCategory(categoryId));
+
+      const mock = httpMock.expectOne(`${serverAddress}/items?categoryId=${categoryId}`);
+      mock.flush(mockError.error, mockError);
+
+      expect(await response).toEqual(result)
+    })
   })
 
-  // getProductsByCategory
-  it('should return array of products filtered by category', (done: DoneFn) => {
-    const categoryId = 1;
-    const result = [dummyProduct];
+  describe('getFeaturedProducts', () => {
+    it('should return array of products featured in carousel', async () => {
+      const result = [dummyProduct];
+      const response = firstValueFrom(service.getFeaturedProducts());
 
-    spyOn(service, 'getProductsByCategory').and.returnValue(of(result));
+      const mock = httpMock.expectOne(`${serverAddress}/items`);
+      mock.flush([dummyProduct]);
 
-    service.getProductsByCategory(categoryId).subscribe(response => {
-      expect(response).toEqual(result);
+      expect(await response).toEqual(result);
     })
-    done();
+
+    it('should return error after getting featured products fails', async () => {
+      const errorSpy = jasmine.createSpy('errorSpy');
+      const response = firstValueFrom(service.getFeaturedProducts()).catch(errorSpy);
+
+      const mock = httpMock.expectOne(`${serverAddress}/items`);
+      mock.flush(mockError.error, mockError);
+      await response;
+
+      expect(errorSpy).toHaveBeenCalled();
+    })
   })
 
-  it('should return empty array after getting products by category fails', (done: DoneFn) => {
-    const message = "Error while getting products by category";
-    const categoryId = 1;
-    const result = [] as Product[];
+  describe('createProduct', () => {
+    it('should return created product', async () => {
+      const result = dummyProduct;
+      const response = firstValueFrom(service.createProduct(newProduct));
 
-    spyOn(service, 'getProductsByCategory').and.callFake(() => {
-      alertServiceSpy.setErrorMessage(message);
-      return of(result)
-    });
+      const mock = httpMock.expectOne(`${serverAddress}/items`);
+      mock.flush(newProduct);
 
-    service.getProductsByCategory(categoryId).subscribe(response => {
-      expect(response).toEqual(result)
-      expect(alertServiceSpy.setErrorMessage.calls.count())
-        .withContext('alertService was called once')
-        .toBe(1);
+      expect(await response).toEqual(result);
     })
-    done();
   })
 
-  // getFeaturedProducts
-  it('should return array of products featured in carousel', (done: DoneFn) => {
-    const result = [dummyProduct];
+  describe('editProduct', () => {
+    it('should return edited product', async () => {
+      const result = dummyProduct;
+      const response = firstValueFrom(service.editProduct(dummyProduct));
 
-    spyOn(service, 'getFeaturedProducts').and.returnValue(of(result));
+      const mock = httpMock.expectOne(`${serverAddress}/items/${dummyProduct.id}`);
+      mock.flush(dummyProduct);
 
-    service.getFeaturedProducts().subscribe(response => {
-      expect(response).toEqual(result);
+      expect(await response).toEqual(result);
     })
-    done();
   })
 
-  it('should return error after getting featured products fails', (done: DoneFn) => {
-    const message = 'Error while getting featured products';
+  describe('deleteProduct', () => {
+    it('should be called when remove product button is pressed', () => {
+      firstValueFrom(service.removeProduct(1));
 
-    spyOn(service, 'getFeaturedProducts').and.returnValue(throwError(() => {
-      alertServiceSpy.setErrorMessage(message);
-      return new Error(message)
-    }));
+      const mock = httpMock.expectOne(`${serverAddress}/items/1`);
+      mock.flush(null);
 
-    service.getFeaturedProducts().subscribe({
-      error: error => {
-        expect(error.message).toContain(message)
-        expect(alertServiceSpy.setErrorMessage.calls.count())
-          .withContext('alertService was called once')
-          .toBe(1);
-      }
+      expect(mock.request.method).toBe('DELETE');
     })
-    done();
-  })
-
-  // createProduct
-  it('should return created product', (done: DoneFn) => {
-    const result = dummyProduct;
-
-    spyOn(service, 'createProduct').and.returnValue(of(result));
-
-    service.createProduct(newProduct).subscribe(response => {
-      expect(response).toEqual(result);
-    })
-    done();
-  })
-
-  it('should return error after creating product fails', (done: DoneFn) => {
-    const message = 'Error while creating product';
-
-    spyOn(service, 'createProduct').and.returnValue(throwError(() => {
-      alertServiceSpy.setErrorMessage(message);
-      return new Error(message)
-    }));
-
-    service.createProduct(newProduct).subscribe({
-      error: error => {
-        expect(error.message).toContain(message);
-        expect(alertServiceSpy.setErrorMessage.calls.count())
-          .withContext('alertService was called once')
-          .toBe(1);
-      }
-    })
-    done();
-  })
-
-  // editProduct
-  it('should return edited product', (done: DoneFn) => {
-    const result = dummyProduct;
-
-    spyOn(service, 'editProduct').and.returnValue(of(result));
-
-    service.editProduct(dummyProduct).subscribe(response => {
-      expect(response).toEqual(result);
-    })
-    done();
-  })
-
-  it('should return error after editing product fails', (done: DoneFn) => {
-    const message = 'Error while editing product';
-
-    spyOn(service, 'editProduct').and.returnValue(throwError(() => {
-      alertServiceSpy.setErrorMessage(message);
-      return new Error(message)
-    }));
-
-    service.editProduct(dummyProduct).subscribe({
-      error: error => {
-        expect(error.message).toContain(message);
-        expect(alertServiceSpy.setErrorMessage.calls.count())
-          .withContext('alertService was called once')
-          .toBe(1);
-      }
-    })
-    done();
-  })
-
-  // deleteProduct
-  it('should be called when remove product button is pressed', (done: DoneFn) => {
-    const mockId = 1;
-
-    const spy = spyOn(service, 'removeProduct').and.returnValue(of({} as Product));
-
-    service.removeProduct(mockId).subscribe(_ => {
-      expect(spy).toHaveBeenCalled();
-    })
-    done();
-  })
-
-
-  it('should return error after removing product fails', (done: DoneFn) => {
-    const mockId = 1;
-    const message = 'Error while deleting product';
-
-    spyOn(service, 'removeProduct').and.returnValue(throwError(() => {
-      alertServiceSpy.setErrorMessage(message);
-      return new Error(message)
-    }));
-
-    service.removeProduct(mockId).subscribe({
-      error: error => {
-        expect(error.message).toContain(message);
-        expect(alertServiceSpy.setErrorMessage.calls.count())
-          .withContext('alertService was called once')
-          .toBe(1);
-      }
-    })
-    done();
   })
 });

@@ -1,6 +1,6 @@
 header {
     position: sticky;
-    height: 65px;
+    height: calc(var(--size-4) *2);
     top: 0;
     left: 0;
     z-index: 2;

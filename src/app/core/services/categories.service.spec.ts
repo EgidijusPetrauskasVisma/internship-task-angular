@@ -1,18 +1,20 @@
 import { TestBed } from '@angular/core/testing';
-import { HttpClientModule } from '@angular/common/http';
-import { of, throwError } from 'rxjs';
+import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import { firstValueFrom } from 'rxjs';
 
 import { CategoriesService } from './categories.service';
 
 describe('CategoriesService', () => {
   let service: CategoriesService;
+  let httpMock: HttpTestingController;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [HttpClientModule],
+      imports: [HttpClientTestingModule],
       providers: [CategoriesService]
     });
     service = TestBed.inject(CategoriesService);
+    httpMock = TestBed.inject(HttpTestingController);
   });
 
   it('should be created', () => {
@@ -20,36 +22,15 @@ describe('CategoriesService', () => {
   });
 
 
-  // getProductCategories
-  it('should return array of product categories', (done: DoneFn) => {
-    const result = { id: 1, title: 'cars' }
+  describe('getProductCategories', () => {
+    it('should return array of product categories', async () => {
+      const result = { id: 1, title: 'cars' }
+      const response = firstValueFrom(service.getProductCategories());
 
-    spyOn(service, 'getProductCategories').and.returnValue(of([result]));
+      const mock = httpMock.expectOne('http://localhost:8400/categories');
+      mock.flush([result]);
 
-    service.getProductCategories().subscribe(response => {
-      expect(response).toEqual([result]);
+      expect(await response).toEqual([result]);
     })
-    done();
-  })
-
-  it('should return error while getting array product categories', (done: DoneFn) => {
-    const message = 'error while getting product categories';
-    const alertServiceSpy = jasmine.createSpyObj('AlertService', ['setErrorMessage']);
-
-    spyOn(service, 'getProductCategories').and.returnValue(throwError(() => {
-      alertServiceSpy.setErrorMessage(message);
-      return new Error(message)
-    }));
-
-    service.getProductCategories().subscribe({
-      error: error => {
-        expect(error.message)
-          .toContain('error while getting product categories');
-        expect(alertServiceSpy.setErrorMessage.calls.count())
-          .withContext('alertService was called once')
-          .toBe(1);
-      }
-    })
-    done();
   })
 });

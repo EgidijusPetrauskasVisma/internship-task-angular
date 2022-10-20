@@ -1,12 +1,10 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-
-import { ShopPageComponent } from './shop-page.component';
+import { HomePageComponent } from './home-page.component';
 
 
 const routes: Routes = [
-    { path: '', redirectTo: 'cars', pathMatch: 'full' },
-    { path: ':category', component: ShopPageComponent },
+    { path: '', component: HomePageComponent },
 
 ];
 
@@ -14,4 +12,4 @@ const routes: Routes = [
     imports: [RouterModule.forChild(routes)],
     exports: [RouterModule]
 })
-export class ShopPageRoutingModule { }
+export class HomePageRoutingModule { }

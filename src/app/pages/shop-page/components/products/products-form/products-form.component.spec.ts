@@ -2,12 +2,13 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { ProductsFormComponent } from './products-form.component';
 import { ReactiveFormsModule } from '@angular/forms';
-import { Product, NewProduct } from '../../../../../core/types/product';
+import { Product } from '../../../../../core/types/product';
+import { NewProduct } from 'src/app/core/types';
 
 describe('ProductsFormComponent', () => {
   let component: ProductsFormComponent;
   let fixture: ComponentFixture<ProductsFormComponent>;
-  const dummyProduct = {
+  const dummyProduct: Product = {
     title: "fake",
     description: "",
     img: "",
@@ -17,7 +18,7 @@ describe('ProductsFormComponent', () => {
     categoryId: 4,
     id: 3
   };
-  const dummyNewProduct: Omit<Product, 'id'> = dummyProduct;
+  const dummyNewProduct: NewProduct = dummyProduct;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -43,112 +44,80 @@ describe('ProductsFormComponent', () => {
     expect(component.productForm.contains('fuel')).toBeTruthy();
   })
 
-  //title
-  it('should make title control required', () => {
-    const control = component.productForm.get('title');
+  describe('title', () => {
+    it('should make title control required', () => {
+      const control = component.productForm.get('title');
 
-    control?.setValue('');
+      control?.setValue('');
 
-    expect(control!.valid).toBeFalsy();
+      expect(control!.valid).toBeFalsy();
+    })
+
+    it('should make title control of minimum 3 characters', () => {
+      const control = component.productForm.get('title');
+
+      control?.setValue('ah');
+
+      expect(control!.valid).toBeFalsy();
+    })
   })
 
-  it('should make title control of minimum 3 characters', () => {
-    const control = component.productForm.get('title');
+  describe('description', () => {
+    it('should make description control of maximum 80 characters', () => {
+      const control = component.productForm.get('description');
+      const descriptionFake = Array.from(Array(82), () => 'a').join('');
 
-    control?.setValue('ah');
+      control?.setValue(descriptionFake);
 
-    expect(control!.valid).toBeFalsy();
+      expect(control!.valid).toBeFalsy();
+    })
   })
 
-  //description
-  it('should make description control of maximum 80 characters', () => {
-    const control = component.productForm.get('description');
-    const descriptionFake = Array.from(Array(82), () => 'a').join('');
+  describe('img', () => {
+    it('should make img control required', () => {
+      const control = component.productForm.get('img');
 
-    control?.setValue(descriptionFake);
+      control?.setValue('');
 
-    expect(control!.valid).toBeFalsy();
+      expect(control!.valid).toBeFalsy();
+    })
   })
 
-  //img
-  it('should make img control required', () => {
-    const control = component.productForm.get('img');
+  describe('price', () => {
+    it('should make price control required', () => {
+      const control = component.productForm.get('price');
 
-    control?.setValue('');
+      control?.setValue(0);
 
-    expect(control!.valid).toBeFalsy();
+      expect(control!.valid).toBeFalsy();
+    })
   })
 
-  //price
-  it('should make price control required', () => {
-    const control = component.productForm.get('price');
+  describe('fuel', () => {
+    it('should make fuel control required', () => {
+      const control = component.productForm.get('fuel');
 
-    control?.setValue(0);
+      control?.setValue('');
 
-    expect(control!.valid).toBeFalsy();
+      expect(control!.valid).toBeFalsy();
+    })
   })
 
-  //fuel
-  it('should make fuel control required', () => {
-    const control = component.productForm.get('fuel');
 
-    control?.setValue('');
+  describe('setFormValues', () => {
+    it('should set form values', () => {
+      component.setFormValues(dummyProduct);
 
-    expect(control!.valid).toBeFalsy();
+      expect(component.productForm.value).toEqual(dummyNewProduct);
+    })
   })
 
-  //createNewProductEvent
-  it('should raise createNewProductEvent', () => {
-    let eventValue = {};
-    component.createNewProductEvent.subscribe(p => eventValue = p);
+  describe('reset', () => {
+    it('should reset form', () => {
+      component.reset();
 
-    component.createProduct(dummyNewProduct);
-
-    expect(eventValue).toBe(dummyNewProduct);
-  })
-
-  //editProductEvent
-  it('should raise editProductEvent', () => {
-    let eventValue = {};
-    component.editProductEvent.subscribe(p => eventValue = p);
-
-    component.editProduct(dummyProduct);
-
-    expect(eventValue).toBe(dummyProduct);
-  })
-
-  //setFormValues
-  it('should set form values', () => {
-    component.setFormValues(dummyProduct);
-
-    expect(component.productForm.value).toEqual(dummyNewProduct);
-  })
-
-  //reset
-  it('should reset form', () => {
-    component.reset();
-
-    expect(component.productForm.value.title).toBeNull();
-  })
-
-  //submit
-  it('should call editProduct if productForm.value.id is true', () => {
-    const editProduct = spyOn(component, 'editProduct').and.callThrough();
-
-    component.productForm.setValue(dummyProduct);
-    component.submit();
-
-    expect(component.productForm.value).toEqual(dummyProduct);
-    expect(editProduct.calls.count()).toBe(1);
-  })
-
-  it('should call createProduct if productForm.value.id is NOT true', () => {
-    const createProduct = spyOn(component, 'createProduct').and.callThrough();
-
-    component.productForm.patchValue({ id: 0 });
-    component.submit();
-
-    expect(createProduct.calls.count()).toBe(1);
+      expect(component.productForm.value.title).toBeNull();
+    })
   })
 });
 

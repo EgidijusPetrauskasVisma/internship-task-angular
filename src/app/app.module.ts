@@ -8,7 +8,7 @@ import { HomePageModule } from './pages/home-page/home-page.module';
 import { ShopPageModule } from './pages/shop-page/shop-page.module';
 import { HeaderModule } from './core/components/header/header.module';
 import { FooterModule } from './core/components/footer/footer.module';
-import { AlertModule } from './shared/alert/alert.module';
+import { AlertModule } from './core/components/alert/alert.module';
 import { InfoHeadingModule } from './core/components/info-heading/info-heading.module';
 
 @NgModule({

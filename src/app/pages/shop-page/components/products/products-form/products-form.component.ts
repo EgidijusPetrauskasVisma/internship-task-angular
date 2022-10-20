@@ -10,8 +10,8 @@ import { id, categoryId } from '../../../../../core/constants';
   styleUrls: ['./products-form.component.css']
 })
 export class ProductsFormComponent {
-  @Output() createNewProductEvent = new EventEmitter();
-  @Output() editProductEvent = new EventEmitter();
+  @Output() createNewProduct = new EventEmitter();
+  @Output() editProduct = new EventEmitter();
 
   productForm = this.fb.group({
     id: [0],
@@ -19,38 +19,18 @@ export class ProductsFormComponent {
     title: ['', [Validators.minLength(3), Validators.required]],
     description: ['', Validators.maxLength(80)],
     img: ['', Validators.required],
-    price: [0, Validators.min(1)],
+    price: [0, [Validators.min(1), Validators.required]],
     fuel: ['', Validators.required],
     flag: [false],
   })
-
-  get title() {
-    return this.productForm.get('title');
-  }
-
-  get description() {
-    return this.productForm.get('description');
-  }
-
-  get img() {
-    return this.productForm.get('img');
-  }
-
-  get price() {
-    return this.productForm.get('price');
-  }
-
-  get fuel() {
-    return this.productForm.get('fuel');
-  }
 
   constructor(private fb: FormBuilder) { }
 
   submit() {
     if (!this.productForm.value.id) {
-      this.createProduct(this.formatNewProduct(this.productForm.value))
+      this.createNewProduct.emit(this.formatNewProduct(this.productForm.value));
     } else {
-      this.editProduct(this.productForm.value as Product);
+      this.editProduct.emit(this.productForm.value as Product);
     }
   }
 
@@ -63,16 +43,8 @@ export class ProductsFormComponent {
     this.productForm.patchValue(product);
   }
 
-  createProduct(product: NewProduct) {
-    this.createNewProductEvent.emit(product);
-  }
-
-  editProduct(product: Product) {
-    this.editProductEvent.emit(product);
-  }
-
   reset() {
     this.productForm.reset();
-    this.fuel?.setValue('');
+    this.productForm.get('fuel')?.setValue('');
   }
 }

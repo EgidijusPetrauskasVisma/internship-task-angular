@@ -1,4 +1,4 @@
-import { Component, Input, Output, ViewChild, EventEmitter } from '@angular/core';
+import { Component, Input } from '@angular/core';
 
 import { ProductsService } from '../../../../core/services/products.service';
 
@@ -15,8 +15,7 @@ import { Category } from '../../../../core/types';
 export class ProductsComponent {
   @Input() products: Product[] = [];
   @Input() currentCategory: Category = {} as Category;
-  @ViewChild('productForm') productForm!: ProductsFormComponent;
-  @Output() fuelFiltersEvent = new EventEmitter;
+  filterValue: 'all' | 'petrol' | 'diesel' = 'all'
   dialogOpen: boolean = false;
 
   constructor(private productsService: ProductsService) { }
@@ -31,7 +30,6 @@ export class ProductsComponent {
 
   private handleAddProduct(product: Product) {
     this.products.push(product);
-    this.toggleDialog();
   }
 
   private handleDeleteProduct(id: number) {
@@ -40,15 +38,15 @@ export class ProductsComponent {
 
   private handleEditProduct(product: Product) {
     this.products = this.products.map(p => p.id === product.id ? product : p)
-    this.toggleDialog();
   }
 
-  createProduct(product: NewProduct): void {
+  createProduct(product: NewProduct, productForm: ProductsFormComponent): void {
     const newProduct = { categoryId: this.currentCategory.id, ...product }
     this.productsService.createProduct(newProduct).subscribe({
       next: this.handleAddProduct.bind(this),
       error: this.handleError.bind(this)
     });
+    this.toggleDialog(productForm);
   }
 
   deleteProduct(id: number): void {
@@ -58,23 +56,21 @@ export class ProductsComponent {
     });
   }
 
-  editProduct(product: Product): void {
+  editProduct(product: Product, productForm: ProductsFormComponent): void {
     this.productsService.editProduct(product).subscribe({
       next: this.handleEditProduct.bind(this),
       error: this.handleError.bind(this)
     });
+    this.toggleDialog(productForm);
+
   }
 
-  toggleDialog(product?: Product): void {
-    if (!this.productForm) return;
-    this.productForm.reset();
+  toggleDialog(productForm: ProductsFormComponent, product?: Product): void {
+    if (!productForm) return;
+    productForm.reset();
     this.dialogOpen = !this.dialogOpen;
     if (product) {
-      this.productForm.setFormValues(product);
+      productForm.setFormValues(product);
     }
-  }
-
-  filterByFuel(value: string) {
-    this.fuelFiltersEvent.emit(value);
   }
 }

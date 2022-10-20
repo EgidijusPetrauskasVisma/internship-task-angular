@@ -2,12 +2,12 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 import { AlertComponent } from './alert.component';
-import { CloseButtonModule } from '../app-close-button/close-button.module';
+import { SharedModule } from '../../../shared/shared.module';
 
 
 @NgModule({
   declarations: [AlertComponent],
-  imports: [CommonModule, CloseButtonModule],
+  imports: [CommonModule, SharedModule],
   exports: [AlertComponent]
 })
 export class AlertModule { }

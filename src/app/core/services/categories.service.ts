@@ -16,16 +16,10 @@ export class CategoriesService {
     private alertService: AlertService
   ) { }
 
-  handleError<T>(operation = 'operation') {
-    return (error: any): Observable<T> => {
-      this.alertService.setErrorMessage(`Operation ${operation} failed`)
-      return error;
-    }
-  }
 
   getProductCategories(): Observable<Category[]> {
     return this.http.get<Category[]>(`${this.productsUrl}/categories`).pipe(
-      catchError(this.handleError<Category[]>('getCategories'))
+      catchError(this.alertService.handleError<Category[]>('getCategories'))
     )
   }
 }
