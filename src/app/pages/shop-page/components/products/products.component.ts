@@ -1,10 +1,10 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 
 import { ProductsService } from '../../../../core/services/products.service';
 
 import { ProductsFormComponent } from './products-form/products-form.component';
 import { Product, NewProduct } from '../../../../core/types';
-import { Category } from '../../../../core/types';
 
 
 @Component({
@@ -14,11 +14,15 @@ import { Category } from '../../../../core/types';
 })
 export class ProductsComponent {
   @Input() products: Product[] = [];
-  @Input() currentCategory: Category = {} as Category;
+  currentCategoryId = Number(this.route.snapshot.queryParamMap.get('categoryId'));
+  categoryTitle = this.route.snapshot.paramMap.get('category')
   filterValue: 'all' | 'petrol' | 'diesel' = 'all'
   dialogOpen: boolean = false;
 
-  constructor(private productsService: ProductsService) { }
+  constructor(
+    private productsService: ProductsService,
+    private route: ActivatedRoute,
+  ) { }
 
   get productsEmpty(): boolean {
     return this.products.length > 0;
@@ -41,7 +45,7 @@ export class ProductsComponent {
   }
 
   createProduct(product: NewProduct, productForm: ProductsFormComponent): void {
-    const newProduct = { categoryId: this.currentCategory.id, ...product }
+    const newProduct = { categoryId: this.currentCategoryId, ...product }
     this.productsService.createProduct(newProduct).subscribe({
       next: this.handleAddProduct.bind(this),
       error: this.handleError.bind(this)

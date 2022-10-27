@@ -1,4 +1,4 @@
 <section>
     <button type="button" *ngFor="let category of categories" [routerLink]="['/shop', category.title]"
-        id="{{category.id}}">{{category.title}}</button>
+        [queryParams]="{categoryId: category.id}" id="{{category.id}}">{{category.title}}</button>
 </section>

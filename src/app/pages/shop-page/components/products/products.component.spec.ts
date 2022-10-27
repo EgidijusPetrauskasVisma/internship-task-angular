@@ -5,6 +5,7 @@ import { ProductsComponent } from './products.component';
 import { HttpClientModule } from '@angular/common/http';
 import { ProductsService } from '../../../../core/services/products.service';
 import { Product } from '../../../../core/types';
+import { RouterTestingModule } from '@angular/router/testing';
 
 describe('ProductsComponent', () => {
   let component: ProductsComponent;
@@ -29,7 +30,7 @@ describe('ProductsComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [ProductsComponent],
-      imports: [HttpClientModule],
+      imports: [HttpClientModule, RouterTestingModule],
     }).compileComponents();
 
     fixture = TestBed.createComponent(ProductsComponent);
