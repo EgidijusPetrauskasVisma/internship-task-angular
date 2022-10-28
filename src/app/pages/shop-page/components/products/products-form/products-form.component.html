@@ -1,0 +1,43 @@
+<form [formGroup]="productForm" (ngSubmit)="submit()" (keydown.enter)="$event.preventDefault()">
+    <h3>Product Form</h3>
+
+    <input [formControl]="productForm.controls.id" type="hidden">
+    <input [formControl]="productForm.controls.categoryId" type="hidden">
+
+    <form-field>
+        <label>Title</label>
+        <input [formControl]="productForm.controls.title" type="text" name="title" placeholder="Title...">
+    </form-field>
+
+    <form-field>
+        <label>Description</label>
+        <input [formControl]="productForm.controls.description" name="description" type="text"
+            placeholder="Description..." autocomplete="off">
+    </form-field>
+
+    <form-field>
+        <label>Image</label>
+        <input [formControl]="productForm.controls.img" type="url" name="image" placeholder="http://img...">
+    </form-field>
+
+    <form-field>
+        <label>Price &#8364;</label>
+        <input [formControl]="productForm.controls.price" type="number" name="price" placeholder="8000...">
+    </form-field>
+
+    <form-field>
+        <label>Fuel type</label>
+        <select [formControl]="productForm.controls.fuel" name="fuel">
+            <option value="" selected disabled>Fuel type...</option>
+            <option value="petrol" selected>Petrol</option>
+            <option value="diesel">Diesel</option>
+        </select>
+    </form-field>
+
+    <form-field>
+        <label>Include in Carousel</label>
+        <input [formControl]="productForm.controls.flag" type="checkbox">
+    </form-field>
+
+    <button appButton type="submit" [class.disabled]="!productForm.dirty || productForm.invalid">Submit</button>
+</form>

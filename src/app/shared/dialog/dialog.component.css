@@ -1,0 +1,33 @@
+.backdrop {
+    width: 100%;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2;
+    background-color: var(--color-backdrop);
+}
+
+article {
+    width: 100%;
+    position: relative;
+    background-color: var(--primary-light);
+    border: none;
+    padding: var(--size-4);
+}
+
+button {
+    position: absolute;
+    right: var(--size-4);
+    top: var(--size-4);
+}
+
+/* Tablet */
+@media (min-width: 768px) {
+    article {
+        max-width: 1000px;
+    }
+}

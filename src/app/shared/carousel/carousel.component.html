@@ -1,0 +1,21 @@
+<section style="--slide-index: {{currentSlideIndex}}" class="container">
+
+    <button *ngIf="slides.length >1" aria-label="Carousel previous slide" (click)="prevSlide()">←</button>
+
+    <article>
+        <ul>
+            <li *ngFor="let slide of slides">
+                <img src="{{slide.img}}" alt="{{slide.title}} img">
+                <div class="slide-text-container">
+                    <h2>{{slide.title}}</h2>
+                    <p>{{slide.description}}</p>
+                </div>
+                <a target="_blank" href="{{slide.img}}"></a>
+            </li>
+        </ul>
+        <p class="slides-counter">{{currentSlideIndex + 1}}/{{slides.length}}</p>
+    </article>
+
+    <button *ngIf="slides.length >1" aria-label="Carousel next slide" (click)="nextSlide(slides.length)">→</button>
+
+</section>

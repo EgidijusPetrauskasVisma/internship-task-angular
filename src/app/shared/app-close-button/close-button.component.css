@@ -1,0 +1,16 @@
+:host {
+    background: none;
+    border: none;
+    font-size: calc(var(--font-size-medium) *1.1);
+    font-weight: 600;
+    color: var(--color-delete);
+    padding: var(--size-1) var(--size-2);
+    border-radius: var(--size-1);
+    transition: background-color var(--transition-duration);
+}
+
+:host:hover {
+    cursor: pointer;
+    background-color: var(--color-delete);
+    color: var(--white-main);
+}
