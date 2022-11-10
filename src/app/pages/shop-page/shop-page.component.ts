@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { map, } from 'rxjs';
+import { selectProductsByCategory } from '../../state/products/products.selectors';
+import { selectCurrentCategory } from '../../state/categories/categories.selectors';
 
 
 @Component({
@@ -9,9 +9,6 @@ import { map, } from 'rxjs';
   styleUrls: ['./shop-page.component.css']
 })
 export class ShopPageComponent {
-  products$ = this.route.data.pipe(map(data => data['products']))
-
-  constructor(
-    private route: ActivatedRoute,
-  ) { }
+  products$ = selectProductsByCategory();
+  currentCategory$ = selectCurrentCategory();
 }

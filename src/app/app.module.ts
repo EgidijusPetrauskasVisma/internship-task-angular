@@ -10,6 +10,13 @@ import { HeaderModule } from './core/components/header/header.module';
 import { FooterModule } from './core/components/footer/footer.module';
 import { AlertModule } from './core/components/alert/alert.module';
 import { InfoHeadingModule } from './core/components/info-heading/info-heading.module';
+import { StoreModule } from '@ngrx/store';
+import { EffectsModule } from '@ngrx/effects';
+import { CategoriesEffects } from './state/categories/categories.effects';
+import { appState } from './state/app.state';
+import { ProductsEffects } from './state/products/products.effects';
+import { StoreDevtoolsModule } from '@ngrx/store-devtools';
+import { environment } from '../environments/environment.prod';
 
 @NgModule({
   declarations: [
@@ -24,7 +31,12 @@ import { InfoHeadingModule } from './core/components/info-heading/info-heading.m
     HeaderModule,
     InfoHeadingModule,
     FooterModule,
-    AlertModule
+    AlertModule,
+    StoreModule.forRoot(appState),
+    StoreDevtoolsModule.instrument({
+      logOnly: !environment.production
+    }),
+    EffectsModule.forRoot([CategoriesEffects, ProductsEffects])
   ],
   exports: [],
 

@@ -1,7 +1,6 @@
 import { Component } from '@angular/core';
 
-import { ProductsService } from '../../core/services/products.service';
-import { CategoriesService } from '../../core/services/categories.service';
+import { selectFeaturedProducts } from '../../state/products/products.selectors';
 
 @Component({
   selector: 'app-home-page',
@@ -9,8 +8,5 @@ import { CategoriesService } from '../../core/services/categories.service';
   styleUrls: ['./home-page.component.css']
 })
 export class HomePageComponent {
-  slides$ = this.productsService.getFeaturedProducts();
-  categories$ = this.categoriesService.getProductCategories();
-
-  constructor(private productsService: ProductsService, private categoriesService: CategoriesService) { }
+  slides$ = selectFeaturedProducts();
 }
