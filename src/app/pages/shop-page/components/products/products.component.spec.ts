@@ -1,18 +1,16 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { of } from 'rxjs';
+import { skip } from 'rxjs';
 
 import { ProductsComponent } from './products.component';
-import { HttpClientModule } from '@angular/common/http';
-import { ProductsService } from '../../../../core/services/products.service';
 import { Product } from '../../../../core/types';
-import { RouterTestingModule } from '@angular/router/testing';
+import { provideMockStore, MockStore } from '@ngrx/store/testing';
+import { addProduct, deleteProduct, editProduct } from 'src/app/state/products/products.actions';
+import { ProductsState } from '../../../../state/products/products.reducer';
 
 describe('ProductsComponent', () => {
   let component: ProductsComponent;
   let fixture: ComponentFixture<ProductsComponent>;
-  const productsService = jasmine.createSpyObj<ProductsService>('ProductsService', [
-    'createProduct', 'removeProduct', 'editProduct',
-  ])
+  let store: MockStore<ProductsState>
   const dummyProduct = {
     title: "fake",
     description: "",
@@ -24,21 +22,24 @@ describe('ProductsComponent', () => {
     id: 3
   };
   const dummyNewProduct: Omit<Product, 'id'> = dummyProduct;
-  let handleError: any;
-  let rootElement: HTMLElement;
+  const initialState = {
+    products: {
+      products: [],
+      status: 'pending'
+    }
+  }
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [ProductsComponent],
-      imports: [HttpClientModule, RouterTestingModule],
+      providers: [provideMockStore({ initialState })]
     }).compileComponents();
 
     fixture = TestBed.createComponent(ProductsComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
 
-    handleError = spyOn<any>(component, 'handleError').and.callThrough();
-    rootElement = fixture.nativeElement;
+    store = TestBed.inject(MockStore)
   });
 
   it('should create', () => {
@@ -46,67 +47,44 @@ describe('ProductsComponent', () => {
   });
 
   describe('createProduct', () => {
-    it('should send a call to productsService to crate new product and return it with id', () => {
-      const createProduct = productsService.createProduct.and.returnValue(of(dummyProduct));
+    it('should dispatch addProduct action', () => {
+      const action = addProduct({ product: dummyNewProduct });
 
-      productsService.createProduct(dummyNewProduct).subscribe(res => {
-        expect(createProduct).toHaveBeenCalled();
-        expect(Object.keys(res)).toContain('id');
-      })
-    })
+      store.scannedActions$
+        .pipe(skip(1))
+        .subscribe(scannedAction => {
+          expect(scannedAction).toEqual(action)
+        })
 
-    it('should add new product to component.products', () => {
-      const handleAddProduct = spyOn<any>(component, 'handleAddProduct').and.callFake((p: Product) => {
-        component.products.push(p);
-      });
-
-      handleAddProduct(dummyProduct);
-
-      expect(component.products.indexOf(dummyProduct)).toBeGreaterThan(-1);
+      store.dispatch(action)
     })
   })
 
   describe('deleteProduct', () => {
-    it('should send a call to productService to delete a product', () => {
-      const deleteProduct = productsService.removeProduct.and.returnValue(of(dummyProduct));
+    it('should dispatch deleteProduct action', () => {
+      const action = deleteProduct({ id: dummyProduct.id });
 
-      productsService.removeProduct(dummyProduct.id).subscribe(_ => {
-        expect(deleteProduct).toHaveBeenCalled();
-      })
-    })
+      store.scannedActions$
+        .pipe(skip(1))
+        .subscribe(scannedAction => {
+          expect(scannedAction).toEqual(action)
+        })
 
-    it('should remove product from component.products', () => {
-      let productsFake = [dummyProduct];
-      const handleDeleteProduct = spyOn<any>(component, 'handleDeleteProduct').and.callFake((id: number) => {
-        productsFake = productsFake.filter(p => p.id !== id);
-
-      });
-
-      handleDeleteProduct(dummyProduct.id);
-
-      expect(productsFake.indexOf(dummyProduct)).toBe(-1);
+      store.dispatch(action)
     })
   })
 
   describe('editProduct', () => {
-    it('should send a call to productService to edit a product', () => {
-      const editProduct = productsService.editProduct.and.returnValue(of(dummyProduct));
+    it('should dispatch editProduct action', () => {
+      const action = editProduct({ product: dummyProduct });
 
-      productsService.editProduct(dummyProduct).subscribe(_ => {
-        expect(editProduct).toHaveBeenCalled();
-      })
-    })
+      store.scannedActions$
+        .pipe(skip(1))
+        .subscribe(scannedAction => {
+          expect(scannedAction).toEqual(action)
+        })
 
-    it('should replace edited product in component.products', () => {
-      let productsFake = [{ id: 3, title: 'editableFake' }];
-      const handleEditProduct = spyOn<any>(component, 'handleEditProduct').and.callFake((product: Product) => {
-        productsFake = productsFake.map(p => p.id === product.id ? product : p);
-      });
-
-      handleEditProduct(dummyProduct);
-
-      expect(productsFake.indexOf(dummyProduct)).toBeGreaterThan(-1);
-      expect(productsFake[productsFake.indexOf(dummyProduct)].title).toBe(dummyProduct.title);
+      store.dispatch(action)
     })
   })
 });

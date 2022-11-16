@@ -1,2 +1,4 @@
-<app-products *ngIf="products$ | async as products" [products]="products">
-</app-products>
+<ng-container *ngIf="currentCategory$ | async as currentCategory">
+    <app-products *ngIf=" products$ | async as products" [currentCategory]="currentCategory" [products]="products">
+    </app-products>
+</ng-container>
